@@ -10,33 +10,33 @@ jobs:
       contents: write
 
     steps:
-    - name: Pull required images
-      run: |
-        # Ingress NGINX
-        docker pull k8s.gcr.io/ingress-nginx/controller:v1.10.1
-        docker pull k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.4.1
-        
-        # Metrics Server
-        docker pull k8s.gcr.io/metrics-server/metrics-server:v0.7.1
-        
-        # Flannel v0.25.1 + CNI Plugin
-        docker pull flannel/flannel:v0.25.1
-        docker pull rancher/mirrored-flannelcni-flannel-cni-plugin:v1.4.0-flannel1
+      - name: Pull required images
+        run: |
+          # Ingress NGINX
+          docker pull k8s.gcr.io/ingress-nginx/controller:v1.10.1
+          docker pull k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.4.1
+          
+          # Metrics Server
+          docker pull k8s.gcr.io/metrics-server/metrics-server:v0.7.1
+          
+          # Flannel v0.25.1 + CNI Plugin (OFFICIAL)
+          docker pull flannel/flannel:v0.25.1
+          docker pull flannel/flannel-cni-plugin:v1.4.0-flannel1
 
-    - name: Save and compress all images
-      run: |
-        docker save \
-          k8s.gcr.io/ingress-nginx/controller:v1.10.1 \
-          k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.4.1 \
-          k8s.gcr.io/metrics-server/metrics-server:v0.7.1 \
-          flannel/flannel:v0.25.1 \
-          rancher/mirrored-flannelcni-flannel-cni-plugin:v1.4.0-flannel1 \
-          -o missing-images.tar
-        gzip missing-images.tar
+      - name: Save and compress all images
+        run: |
+          docker save \
+            k8s.gcr.io/ingress-nginx/controller:v1.10.1 \
+            k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.4.1 \
+            k8s.gcr.io/metrics-server/metrics-server:v0.7.1 \
+            flannel/flannel:v0.25.1 \
+            flannel/flannel-cni-plugin:v1.4.0-flannel1 \
+            -o missing-images.tar
+          gzip missing-images.tar
 
-    - name: Create Release and upload
-      uses: softprops/action-gh-release@v1
-      with:
-        files: missing-images.tar.gz
-        tag_name: flannel-v0.25.1-compatible
-        name: Offline Images for Flannel v0.25.1
+      - name: Create Release and upload
+        uses: softprops/action-gh-release@v1
+        with:
+          files: missing-images.tar.gz
+          tag_name: flannel-v0.25.1-compatible
+          name: Offline Images for Flannel v0.25.1
