@@ -1,0 +1,35 @@
+name: Pull K8s Images and Package
+
+on:
+  workflow_dispatch:
+
+jobs:
+  pull-and-package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Pull images from official registries
+      run: |
+        docker pull k8s.gcr.io/ingress-nginx/controller:v1.10.1
+        docker pull k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.4.1
+        docker pull k8s.gcr.io/metrics-server/metrics-server:v0.7.1
+        docker pull flannel/flannel-cni-plugin:v1.3.0
+
+    - name: Save and compress images
+      run: |
+        docker save \
+          k8s.gcr.io/ingress-nginx/controller:v1.10.1 \
+          k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.4.1 \
+          k8s.gcr.io/metrics-server/metrics-server:v0.7.1 \
+          flannel/flannel-cni-plugin:v1.3.0 \
+          -o missing-images.tar
+        gzip missing-images.tar
+
+    - name: Create GitHub Release and upload asset
+      uses: softprops/action-gh-release@v1
+      with:
+        files: missing-images.tar.gz
+        tag_name: v1.0
+        name: Offline Images v1.0
